@@ -11,9 +11,9 @@ https://docs.djangoproject.com/en/3.0/ref/settings/
 """
 
 import os
+from sys import stdout
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
-from os import getenv
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -21,7 +21,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # See https://docs.djangoproject.com/en/3.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = getenv('SECRET_KEY', 'srp_)^abqzc*k4rj%&+d+9wngk3)&c_im0pqii035+d5f#&8l-')
+SECRET_KEY = os.getenv('SECRET_KEY', 'srp_)^abqzc*k4rj%&+d+9wngk3)&c_im0pqii035+d5f#&8l-')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
@@ -76,11 +76,11 @@ WSGI_APPLICATION = 'hwamin.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'HOST': getenv('DB_HOST', '127.0.0.1'),
-        'PORT': getenv('DB_PORT', '5432'),
-        'NAME': getenv('DB_NAME', 'hwamin'),
-        'USER': getenv('DB_USER', 'hwamin'),
-        'PASSWORD': getenv('DB_PASSWORD', 'hwamin'),
+        'HOST': os.getenv('DB_HOST', '127.0.0.1'),
+        'PORT': os.getenv('DB_PORT', '5432'),
+        'NAME': os.getenv('DB_NAME', 'hwamin'),
+        'USER': os.getenv('DB_USER', 'hwamin'),
+        'PASSWORD': os.getenv('DB_PASSWORD', 'hwamin'),
     }
 }
 
@@ -121,3 +121,28 @@ USE_TZ = True
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 STATIC_URL = '/static/'
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
+# Log Configuration
+# https://docs.djangoproject.com/en/3.0/topics/logging/
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+        },
+    },
+    'loggers': {
+        '': {
+            'handlers': ['console'],
+            'level': 'WARNING',
+        }
+    }
+}
+
+# Line bot configuration
+# https://developers.line.biz/console/
+
+LINE_CHANNEL_SECRET = os.getenv('LINE_CHANNEL_SECRET')
+LINE_ACCESS_TOKEN = os.getenv('LINE_ACCESS_TOKEN')
