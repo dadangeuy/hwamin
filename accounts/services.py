@@ -1,16 +1,16 @@
-from typing import List
+from django.core.exceptions import ObjectDoesNotExist
 
-from django.db.transaction import atomic
-
-from accounts.models import LineAccount
+from accounts.models import Profile
 from commons.patterns import Runnable
+from line.services import RetrieveProfileLineService
 
 
-class BulkCreateLineAccountService(Runnable):
+class RetrieveProfileService(Runnable):
     @classmethod
-    @atomic(savepoint=False)
-    def run(cls, line_ids: List[str]) -> List[LineAccount]:
-        return [
-            LineAccount.objects.get_or_create(line_id=line_id)
-            for line_id in line_ids
-        ]
+    def run(cls, profile_id: str) -> Profile:
+        try:
+            return Profile.objects.get(id=profile_id)
+        except ObjectDoesNotExist:
+            profile = RetrieveProfileLineService.run(profile_id)
+            profile.save()
+            return profile
