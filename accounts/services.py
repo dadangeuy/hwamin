@@ -2,7 +2,7 @@ from django.core.exceptions import ObjectDoesNotExist
 
 from accounts.models import Profile
 from commons.patterns import Runnable
-from line.services import RetrieveProfileLineService
+from externals.services import RetrieveProfileLineService
 
 
 class RetrieveProfileService(Runnable):

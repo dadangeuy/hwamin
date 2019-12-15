@@ -1,11 +1,10 @@
-from django.db.transaction import atomic
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.status import HTTP_200_OK
 from rest_framework.views import APIView
 
 from accounts.services import RetrieveProfileService
-from line.services import CreateReplyLineService
+from externals.services import CreateReplyLineService
 
 
 class WebhookAPI(APIView):
