@@ -1,8 +1,13 @@
-from abc import ABC, abstractmethod
+from abc import abstractmethod, ABC
+from typing import TypeVar, Generic
+
+T = TypeVar('T')
 
 
-class Runnable(ABC):
+class Runnable(ABC, Generic[T]):
+    @classmethod
+    async def run_async(cls, **kwargs) -> T: return cls.run(**kwargs)
+
     @classmethod
     @abstractmethod
-    def run(cls, **kwargs) -> any:
-        pass
+    def run(cls, **kwargs) -> T: ...

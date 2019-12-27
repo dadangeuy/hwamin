@@ -11,6 +11,6 @@ class RetrieveProfileService(Runnable):
         try:
             return Profile.objects.get(id=profile_id)
         except ObjectDoesNotExist:
-            profile = RetrieveProfileLineService.run(profile_id)
+            profile = RetrieveProfileLineService.run(profile_id=profile_id)
             profile.save()
             return profile
