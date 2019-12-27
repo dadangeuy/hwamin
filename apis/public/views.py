@@ -18,7 +18,7 @@ class WebhookAPI(APIView):
                 profile = RetrieveProfileService.run(profile_id=profile_id)
 
                 token = event['replyToken']
-                text = event['message']['profile']
+                text = event['message']['text']
                 reply_text = eval(text)
                 CreateReplyLineService.run(token, [reply_text])
 
