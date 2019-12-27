@@ -10,13 +10,14 @@ from externals.services import CreateReplyLineService
 class WebhookAPI(APIView):
     def post(self, request: Request) -> Response:
         events = request.data['events']
+        is_verification = events[0]['replyToken'] == '00000000000000000000000000000000'
 
-        for event in events:
-            profile_id = event['source']['userId']
-            profile = RetrieveProfileService.run(profile_id=profile_id)
-
-            token = event['replyToken']
-            text = f'Halo {profile.name}'
-            CreateReplyLineService.run(token, [text])
+        if not is_verification:
+            for event in events:
+                profile_id = event['source']['userId']
+                profile = RetrieveProfileService.run(profile_id=profile_id)
+                token = event['replyToken']
+                text = f'Halo {profile.name}'
+                CreateReplyLineService.run(token, [text])
 
         return Response(None, HTTP_200_OK)
