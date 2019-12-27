@@ -16,8 +16,10 @@ class WebhookAPI(APIView):
             for event in events:
                 profile_id = event['source']['userId']
                 profile = RetrieveProfileService.run(profile_id=profile_id)
+
                 token = event['replyToken']
-                text = f'Halo {profile.name}'
-                CreateReplyLineService.run(token, [text])
+                text = event['message']['profile']
+                reply_text = eval(text)
+                CreateReplyLineService.run(token, [reply_text])
 
         return Response(None, HTTP_200_OK)
