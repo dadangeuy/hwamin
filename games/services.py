@@ -1,7 +1,7 @@
 import ast
 import operator
 import re
-from itertools import permutations, combinations
+from itertools import permutations
 from typing import List
 
 from django.contrib.sessions.backends.base import SessionBase
