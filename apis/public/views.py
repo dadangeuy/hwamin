@@ -51,7 +51,7 @@ class WebhookUserMessageAPI(APIView):
 
         if message_type == 'text':
             text = event['message']['text']
-            TextService.run(session, token, text)
+            TextService.run(session, token, text, user_id)
 
         return Response(None, HTTP_200_OK)
 
@@ -60,12 +60,13 @@ class WebhookGroupMessageAPI(APIView):
     def post(self, request: Request, group_id: str) -> Response:
         session = request.session
         event = request.data
+        user_id = event['source']['userId']
         token = event['replyToken']
         message_type = event['message']['type']
 
         if message_type == 'text':
             text = event['message']['text']
-            TextService.run(session, token, text)
+            TextService.run(session, token, text, user_id)
 
         return Response(None, HTTP_200_OK)
 
@@ -74,11 +75,12 @@ class WebhookRoomMessageAPI(APIView):
     def post(self, request: Request, room_id: str) -> Response:
         session = request.session
         event = request.data
+        user_id = event['source']['userId']
         token = event['replyToken']
         message_type = event['message']['type']
 
         if message_type == 'text':
             text = event['message']['text']
-            TextService.run(session, token, text)
+            TextService.run(session, token, text, user_id)
 
         return Response(None, HTTP_200_OK)

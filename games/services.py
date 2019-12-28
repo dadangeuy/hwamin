@@ -8,6 +8,7 @@ from django.contrib.sessions.backends.base import SessionBase
 from factory.fuzzy import FuzzyInteger
 from simpleeval import SimpleEval
 
+from accounts.services import RetrieveProfileService
 from commons.exceptions import UnknownCommandException
 from commons.patterns import Runnable
 from externals.services import CreateReplyLineService
@@ -101,67 +102,106 @@ class DuaEmpatCalculatorService(Runnable):
 
 class DuaEmpatReplyService(Runnable):
     @classmethod
-    def run(cls, session: SessionBase, token: str, text: str) -> None:
-        messages = None
+    def run(cls, session: SessionBase, token: str, text: str, user_id: str) -> None:
+        messages = []
 
         if text == 'udahan':
             session.clear()
-            messages = ['game selesai']
+            messages.append('game selesai')
+
         elif text == 'ulang':
-            numbers = session['numbers']
-            messages = [numbers.__str__()]
+            messages.append(session['question'].__str__())
+
         elif text == 'nyerah':
-            numbers = session['numbers']
-            answer = DuaEmpatSolverService.run(numbers) or 'tidak ada'
-            numbers = DuaEmpatGeneratorService.run()
-            session['numbers'] = numbers
-            messages = [f'jawabannya {answer}', numbers.__str__()]
+            answer = DuaEmpatSolverService.run(session['question']) or 'tidak ada'
+            messages.append(f'jawabannya {answer}')
+
+            cls._update_scores(session, user_id, -1)
+            messages.append(cls._get_scoreboard(session))
+
+            cls._create_new_question(session)
+            messages.append(session['question'].__str__())
+
         elif text == 'tidak ada':
-            numbers = session['numbers']
-            answer = DuaEmpatSolverService.run(numbers)
-            has_answer = answer is not None
-            if has_answer:
-                messages = ['ada jawabannya loh']
+            answer = DuaEmpatSolverService.run(session['question'])
+
+            if answer is None:
+                messages.append('tidak ada!!')
+                cls._update_scores(session, user_id, 1)
+                messages.append(cls._get_scoreboard(session))
+                cls._create_new_question(session)
+                messages.append(session['question'].__str__())
+
             else:
-                numbers = DuaEmpatGeneratorService.run()
-                session['numbers'] = numbers
-                messages = ['tidak ada!!', numbers.__str__()]
+                messages.append('ada jawabannya loh')
+                cls._update_scores(session, user_id, -1)
+
         else:
             try:
-                numbers = session['numbers']
+                numbers = session['question']
                 result = DuaEmpatCalculatorService.run(numbers, text)
-                is_24 = result == 24
-                if is_24:
-                    numbers = DuaEmpatGeneratorService.run()
-                    session['numbers'] = numbers
-                    messages = ['dua empat!!', numbers.__str__()]
+
+                if result == 24:
+                    messages.append('dua empat!!')
+                    cls._update_scores(session, user_id, 1)
+                    messages.append(cls._get_scoreboard(session))
+                    cls._create_new_question(session)
+                    messages.append(session['question'].__str__())
+
                 else:
-                    messages = [f'{text} hasilnya {result:g}']
+                    messages.append(f'{text} hasilnya {result:g}')
+                    cls._update_scores(session, user_id, -1)
+
             except UnknownCommandException:
                 ...  # ignored
 
         CreateReplyLineService.run(token, messages)
 
+    @staticmethod
+    def _update_scores(session: SessionBase, user_id: str, score: int) -> None:
+        scoreboard = session['scoreboard']
+        current_score = scoreboard.get(user_id, 0)
+        scoreboard[user_id] = current_score + score
+        session['score'] = scoreboard
+
+    @staticmethod
+    def _create_new_question(session: SessionBase) -> None:
+        question = DuaEmpatGeneratorService.run()
+        session['question'] = question
+
+    @staticmethod
+    def _get_scoreboard(session: SessionBase) -> str:
+        scoreboard = session['scoreboard']
+        header_text = '[SCOREBOARD]\n'
+        score_texts = [
+            f'{RetrieveProfileService.run(user_id).name}: {score}'
+            for user_id, score in scoreboard.items()
+        ]
+        score_text = '\n'.join(score_texts)
+
+        return header_text + score_text
+
 
 class StartGameService(Runnable):
     @classmethod
     def run(cls, session: SessionBase, token: str, text: str) -> None:
-        messages = None
+        messages = []
 
         if text == 'main 24':
-            numbers = DuaEmpatGeneratorService.run()
+            session['question'] = DuaEmpatGeneratorService.run()
             session['game'] = 'DUA_EMPAT'
-            session['numbers'] = numbers
-            messages = ['game dimulai', numbers.__str__()]
+            session['scoreboard'] = {}
+            messages.append('game dimulai')
+            messages.append(session['question'].__str__())
 
         CreateReplyLineService.run(token, messages)
 
 
 class TextService(Runnable):
     @classmethod
-    def run(cls, session: SessionBase, token: str, text: str) -> None:
+    def run(cls, session: SessionBase, token: str, text: str, user_id: str) -> None:
         game = session.get('game', None)
         if game is None:
             StartGameService.run(session, token, text)
         elif game == 'DUA_EMPAT':
-            DuaEmpatReplyService.run(session, token, text)
+            DuaEmpatReplyService.run(session, token, text, user_id)
