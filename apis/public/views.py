@@ -1,6 +1,7 @@
 from json import dumps
 from typing import List
 
+from django.contrib.sessions.backends.base import SessionBase
 from requests import Response as APIResponse
 from rest_framework.request import Request
 from rest_framework.response import Response
@@ -9,7 +10,7 @@ from rest_framework.status import HTTP_200_OK
 from rest_framework.views import APIView
 
 from externals.services import CreateReplyLineService
-from games.services import DuaEmpatCalculatorService
+from games.services import DuaEmpatGeneratorService, DuaEmpatCalculatorService
 from sessions.services import RetrieveSessionService
 
 
@@ -45,18 +46,49 @@ class WebhookAPI(APIView):
 
 class WebhookUserMessageAPI(APIView):
     def post(self, request: Request, user_id: str) -> Response:
+        session = request.session
         event = request.data
         token = event['replyToken']
         message_type = event['message']['type']
 
         if message_type == 'text':
             text = event['message']['text']
-            self.process_text(token, text)
+            game = session.get('game', None)
+
+            if game is None:
+                messages = self.process_message(session, text)
+                CreateReplyLineService.run(token, messages)
+            elif game == 'DUA_EMPAT':
+                messages = self.process_dua_empat_message(session, text)
+                CreateReplyLineService.run(token, messages)
 
         return Response(None, HTTP_200_OK)
 
-    def process_text(self, token: str, text: str) -> None:
-        result = DuaEmpatCalculatorService.run(text)
-        is_24 = result == 24
-        reply_text = 'Dua Empat!!' if is_24 else f'Kok {result:g} :('
-        CreateReplyLineService.run(token, [reply_text])
+    def process_message(self, session: SessionBase, text: str) -> List[str]:
+        if text == 'main 24':
+            numbers = DuaEmpatGeneratorService.run()
+            session['game'] = 'DUA_EMPAT'
+            session['numbers'] = numbers
+            return ['game dimulai', numbers.__str__()]
+
+    def process_dua_empat_message(self, session: SessionBase, text: str) -> List[str]:
+        if text == 'ulang':
+            numbers = session['numbers']
+            return [numbers.__str__()]
+        elif text == 'ganti':
+            numbers = DuaEmpatGeneratorService.run()
+            session['numbers'] = numbers
+            return [numbers.__str__()]
+        elif text == 'udahan':
+            session.clear()
+            return ['game selesai']
+        else:
+            numbers = session['numbers']
+            result = DuaEmpatCalculatorService.run(numbers, text)
+            is_24 = result == 24
+            if is_24:
+                numbers = DuaEmpatGeneratorService.run()
+                session['numbers'] = numbers
+                return ['Dua Empat!!', numbers.__str__()]
+            else:
+                return [f'{text} hasilnya {result:g}']
