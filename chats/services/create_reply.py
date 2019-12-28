@@ -21,7 +21,7 @@ class CreateReplyService(Runnable):
         messages = [{'type': 'text', 'text': text} for text in texts]
         data = {
             'replyToken': token,
-            'chats': messages,
+            'messages': messages,
             'notificationDisabled': not notification
         }
         response = post(cls.API, dumps(data), headers=cls.HEADERS)
