@@ -37,8 +37,8 @@ class RetrieveProfileLineService(Runnable):
     }
 
     @classmethod
-    def run(cls, profile_id: str) -> Profile:
-        response = get(cls.API.format(profile_id), headers=cls.HEADERS)
+    def run(cls, user_id: str) -> Profile:
+        response = get(cls.API.format(user_id), headers=cls.HEADERS)
         response.raise_for_status()
         data = response.json()
         return Profile(id=data['userId'], name=data['displayName'], picture=data['pictureUrl'])

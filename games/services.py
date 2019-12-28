@@ -8,6 +8,7 @@ from django.contrib.sessions.backends.base import SessionBase
 from factory.fuzzy import FuzzyInteger
 from simpleeval import SimpleEval
 
+from accounts.models import Profile
 from accounts.services import RetrieveProfileService
 from commons.exceptions import UnknownCommandException
 from commons.patterns import Runnable
@@ -102,7 +103,7 @@ class DuaEmpatCalculatorService(Runnable):
 
 class DuaEmpatReplyService(Runnable):
     @classmethod
-    def run(cls, session: SessionBase, token: str, text: str, user_id: str) -> None:
+    def run(cls, session: SessionBase, token: str, text: str, profile: Profile) -> None:
         messages = []
 
         if text == 'udahan':
@@ -116,7 +117,7 @@ class DuaEmpatReplyService(Runnable):
             answer = DuaEmpatSolverService.run(session['question']) or 'tidak ada'
             messages.append(f'jawabannya {answer}')
 
-            cls._update_scores(session, user_id, -1)
+            cls._update_scores(session, profile, -1)
             messages.append(cls._get_scoreboard(session))
 
             cls._create_new_question(session)
@@ -127,14 +128,14 @@ class DuaEmpatReplyService(Runnable):
 
             if answer is None:
                 messages.append('tidak ada!!')
-                cls._update_scores(session, user_id, 1)
+                cls._update_scores(session, profile, 1)
                 messages.append(cls._get_scoreboard(session))
                 cls._create_new_question(session)
                 messages.append(session['question'].__str__())
 
             else:
                 messages.append('ada jawabannya loh')
-                cls._update_scores(session, user_id, -1)
+                cls._update_scores(session, profile, -1)
 
         else:
             try:
@@ -143,14 +144,14 @@ class DuaEmpatReplyService(Runnable):
 
                 if result == 24:
                     messages.append('dua empat!!')
-                    cls._update_scores(session, user_id, 1)
+                    cls._update_scores(session, profile, 1)
                     messages.append(cls._get_scoreboard(session))
                     cls._create_new_question(session)
                     messages.append(session['question'].__str__())
 
                 else:
                     messages.append(f'{text} hasilnya {result:g}')
-                    cls._update_scores(session, user_id, -1)
+                    cls._update_scores(session, profile, -1)
 
             except UnknownCommandException:
                 ...  # ignored
@@ -158,10 +159,10 @@ class DuaEmpatReplyService(Runnable):
         CreateReplyLineService.run(token, messages)
 
     @staticmethod
-    def _update_scores(session: SessionBase, user_id: str, score: int) -> None:
+    def _update_scores(session: SessionBase, profile: Profile, score: int) -> None:
         scoreboard = session['scoreboard']
-        current_score = scoreboard.get(user_id, 0)
-        scoreboard[user_id] = current_score + score
+        current_score = scoreboard.get(profile.id, 0)
+        scoreboard[profile.id] = current_score + score
         session['score'] = scoreboard
 
     @staticmethod
@@ -174,8 +175,8 @@ class DuaEmpatReplyService(Runnable):
         scoreboard = session['scoreboard']
         header_text = '[SCOREBOARD]\n'
         score_texts = [
-            f'{RetrieveProfileService.run(user_id).name}: {score}'
-            for user_id, score in scoreboard.items()
+            f'{RetrieveProfileService.run(profile_id).name}: {score}'
+            for profile_id, score in scoreboard.items()
         ]
         score_text = '\n'.join(score_texts)
 
@@ -199,9 +200,9 @@ class StartGameService(Runnable):
 
 class TextService(Runnable):
     @classmethod
-    def run(cls, session: SessionBase, token: str, text: str, user_id: str) -> None:
+    def run(cls, session: SessionBase, token: str, text: str, profile: Profile) -> None:
         game = session.get('game', None)
         if game is None:
             StartGameService.run(session, token, text)
         elif game == 'DUA_EMPAT':
-            DuaEmpatReplyService.run(session, token, text, user_id)
+            DuaEmpatReplyService.run(session, token, text, profile)
