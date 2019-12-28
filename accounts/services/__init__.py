@@ -1,1 +1,1 @@
-from .RetrieveProfileService import RetrieveProfileService
+from .retrieve_profile import RetrieveProfileService
