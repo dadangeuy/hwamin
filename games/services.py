@@ -4,10 +4,12 @@ import re
 from itertools import permutations
 from typing import Tuple, List, Optional
 
+from django.contrib.sessions.backends.base import SessionBase
 from factory.fuzzy import FuzzyInteger
 from simpleeval import SimpleEval
 
 from commons.patterns import Runnable
+from externals.services import CreateReplyLineService
 
 
 class DuaEmpatGeneratorService(Runnable):
@@ -94,3 +96,66 @@ class DuaEmpatCalculatorService(Runnable):
         text_numbers = sorted(text_numbers)
         if numbers != text_numbers:
             raise Exception
+
+
+class DuaEmpatReplyService(Runnable):
+    @classmethod
+    def run(cls, session: SessionBase, token: str, text: str) -> None:
+        if text == 'udahan':
+            session.clear()
+            messages = ['game selesai']
+        elif text == 'ulang':
+            numbers = session['numbers']
+            messages = [numbers.__str__()]
+        elif text == 'nyerah':
+            numbers = session['numbers']
+            answer = DuaEmpatSolverService.run(numbers) or 'tidak ada'
+            numbers = DuaEmpatGeneratorService.run()
+            session['numbers'] = numbers
+            messages = [f'jawabannya {answer}', numbers.__str__()]
+        elif text == 'tidak ada':
+            numbers = session['numbers']
+            answer = DuaEmpatSolverService.run(numbers)
+            has_answer = answer is not None
+            if has_answer:
+                messages = ['ada jawabannya loh']
+            else:
+                numbers = DuaEmpatGeneratorService.run()
+                session['numbers'] = numbers
+                messages = ['tidak ada!!', numbers.__str__()]
+        else:
+            numbers = session['numbers']
+            result = DuaEmpatCalculatorService.run(numbers, text)
+            is_24 = result == 24
+            if is_24:
+                numbers = DuaEmpatGeneratorService.run()
+                session['numbers'] = numbers
+                messages = ['dua empat!!', numbers.__str__()]
+            else:
+                messages = [f'{text} hasilnya {result:g}']
+
+        CreateReplyLineService.run(token, messages)
+
+
+class StartGameService(Runnable):
+    @classmethod
+    def run(cls, session: SessionBase, token: str, text: str) -> None:
+        messages = None
+
+        if text == 'main 24':
+            numbers = DuaEmpatGeneratorService.run()
+            session['game'] = 'DUA_EMPAT'
+            session['numbers'] = numbers
+            messages = ['game dimulai', numbers.__str__()]
+
+        CreateReplyLineService.run(token, messages)
+
+
+class TextService(Runnable):
+    @classmethod
+    def run(cls, session: SessionBase, token: str, text: str) -> None:
+        game = session.get('game', None)
+        if game is None:
+            StartGameService.run(session, token, text)
+        elif game == 'DUA_EMPAT':
+            DuaEmpatReplyService.run(session, token, text)

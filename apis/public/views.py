@@ -10,7 +10,8 @@ from rest_framework.status import HTTP_200_OK
 from rest_framework.views import APIView
 
 from externals.services import CreateReplyLineService
-from games.services import DuaEmpatGeneratorService, DuaEmpatCalculatorService, DuaEmpatSolverService
+from games.services import DuaEmpatGeneratorService, DuaEmpatCalculatorService, DuaEmpatSolverService, \
+    DuaEmpatReplyService, StartGameService, TextService
 from sessions.services import RetrieveSessionService
 
 
@@ -53,54 +54,6 @@ class WebhookUserMessageAPI(APIView):
 
         if message_type == 'text':
             text = event['message']['text']
-            game = session.get('game', None)
-
-            if game is None:
-                messages = self.process_message(session, text)
-                CreateReplyLineService.run(token, messages)
-            elif game == 'DUA_EMPAT':
-                messages = self.process_dua_empat_message(session, text)
-                CreateReplyLineService.run(token, messages)
+            TextService.run(session, token, text)
 
         return Response(None, HTTP_200_OK)
-
-    def process_message(self, session: SessionBase, text: str) -> List[str]:
-        if text == 'main 24':
-            numbers = DuaEmpatGeneratorService.run()
-            session['game'] = 'DUA_EMPAT'
-            session['numbers'] = numbers
-            return ['game dimulai', numbers.__str__()]
-
-    def process_dua_empat_message(self, session: SessionBase, text: str) -> List[str]:
-        if text == 'udahan':
-            session.clear()
-            return ['game selesai']
-        elif text == 'ulang':
-            numbers = session['numbers']
-            return [numbers.__str__()]
-        elif text == 'nyerah':
-            numbers = session['numbers']
-            answer = DuaEmpatSolverService.run(numbers) or 'tidak ada'
-            numbers = DuaEmpatGeneratorService.run()
-            session['numbers'] = numbers
-            return [f'jawabannya {answer}', numbers.__str__()]
-        elif text == 'tidak ada':
-            numbers = session['numbers']
-            answer = DuaEmpatSolverService.run(numbers)
-            has_answer = answer is not None
-            if has_answer:
-                return ['ada jawabannya loh']
-            else:
-                numbers = DuaEmpatGeneratorService.run()
-                session['numbers'] = numbers
-                return ['tidak ada!!', numbers.__str__()]
-        else:
-            numbers = session['numbers']
-            result = DuaEmpatCalculatorService.run(numbers, text)
-            is_24 = result == 24
-            if is_24:
-                numbers = DuaEmpatGeneratorService.run()
-                session['numbers'] = numbers
-                return ['dua empat!!', numbers.__str__()]
-            else:
-                return [f'{text} hasilnya {result:g}']
