@@ -8,6 +8,7 @@ from django.contrib.sessions.backends.base import SessionBase
 from factory.fuzzy import FuzzyInteger
 from simpleeval import SimpleEval
 
+from commons.exceptions import UnknownCommandException
 from commons.patterns import Runnable
 from externals.services import CreateReplyLineService
 
@@ -85,7 +86,7 @@ class DuaEmpatCalculatorService(Runnable):
     def _validate_formula(text: str):
         non_formula_text = re.search(r'[^ ()*+\-/0-9]', text)
         if non_formula_text is not None:
-            raise Exception
+            raise UnknownCommandException
 
     @staticmethod
     def _validate_numbers(numbers: List[int], text: str):
@@ -95,7 +96,7 @@ class DuaEmpatCalculatorService(Runnable):
         numbers = sorted(numbers)
         text_numbers = sorted(text_numbers)
         if numbers != text_numbers:
-            raise Exception
+            raise UnknownCommandException
 
 
 class DuaEmpatReplyService(Runnable):
@@ -136,7 +137,8 @@ class DuaEmpatReplyService(Runnable):
                     messages = ['dua empat!!', numbers.__str__()]
                 else:
                     messages = [f'{text} hasilnya {result:g}']
-            except: ...
+            except UnknownCommandException:
+                ...  # ignored
 
         CreateReplyLineService.run(token, messages)
 
