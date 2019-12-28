@@ -1,7 +1,8 @@
 import ast
 import operator
 import re
-from typing import Tuple, List
+from itertools import permutations
+from typing import Tuple, List, Optional
 
 from factory.fuzzy import FuzzyInteger
 from simpleeval import SimpleEval
@@ -24,6 +25,39 @@ class DuaEmpatGeneratorService(Runnable):
     @classmethod
     def _get_random_int(cls) -> int:
         return cls.FUZZY_INTEGER.fuzz()
+
+
+class DuaEmpatSolverService(Runnable):
+    OPERATORS = [
+        operator.add,
+        operator.sub,
+        operator.mul,
+        operator.truediv
+    ]
+    TEXT_BY_OPERATOR = {
+        operator.add: '+',
+        operator.sub: '-',
+        operator.mul: '*',
+        operator.truediv: '/'
+    }
+
+    @classmethod
+    def run(cls, numbers: List[int]) -> str:
+        numbers = sorted(numbers)
+        for numbers in permutations(numbers):
+            for operator_a_b in cls.OPERATORS:
+                for operator_ab_c in cls.OPERATORS:
+                    for operator_abc_d in cls.OPERATORS:
+                        a = numbers[0]
+                        b = numbers[1]
+                        c = numbers[2]
+                        d = numbers[3]
+                        result = operator_abc_d(operator_ab_c(operator_a_b(a, b), c), d)
+                        if result == 24:
+                            a_b_op = cls.TEXT_BY_OPERATOR[operator_a_b]
+                            ab_c_op = cls.TEXT_BY_OPERATOR[operator_ab_c]
+                            abc_d_op = cls.TEXT_BY_OPERATOR[operator_abc_d]
+                            return f'(({a}{a_b_op}{b}){ab_c_op}{c}){abc_d_op}{d}'
 
 
 class DuaEmpatCalculatorService(Runnable):

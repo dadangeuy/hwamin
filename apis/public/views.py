@@ -10,7 +10,7 @@ from rest_framework.status import HTTP_200_OK
 from rest_framework.views import APIView
 
 from externals.services import CreateReplyLineService
-from games.services import DuaEmpatGeneratorService, DuaEmpatCalculatorService
+from games.services import DuaEmpatGeneratorService, DuaEmpatCalculatorService, DuaEmpatSolverService
 from sessions.services import RetrieveSessionService
 
 
@@ -72,16 +72,28 @@ class WebhookUserMessageAPI(APIView):
             return ['game dimulai', numbers.__str__()]
 
     def process_dua_empat_message(self, session: SessionBase, text: str) -> List[str]:
-        if text == 'ulang':
-            numbers = session['numbers']
-            return [numbers.__str__()]
-        elif text == 'ganti':
-            numbers = DuaEmpatGeneratorService.run()
-            session['numbers'] = numbers
-            return [numbers.__str__()]
-        elif text == 'udahan':
+        if text == 'udahan':
             session.clear()
             return ['game selesai']
+        elif text == 'ulang':
+            numbers = session['numbers']
+            return [numbers.__str__()]
+        elif text == 'nyerah':
+            numbers = session['numbers']
+            answer = DuaEmpatSolverService.run(numbers) or 'tidak ada'
+            numbers = DuaEmpatGeneratorService.run()
+            session['numbers'] = numbers
+            return [f'jawabannya {answer}', numbers.__str__()]
+        elif text == 'tidak ada':
+            numbers = session['numbers']
+            answer = DuaEmpatSolverService.run(numbers)
+            has_answer = answer is not None
+            if has_answer:
+                return ['ada jawabannya loh']
+            else:
+                numbers = DuaEmpatGeneratorService.run()
+                session['numbers'] = numbers
+                return ['tidak ada!!', numbers.__str__()]
         else:
             numbers = session['numbers']
             result = DuaEmpatCalculatorService.run(numbers, text)
@@ -89,6 +101,6 @@ class WebhookUserMessageAPI(APIView):
             if is_24:
                 numbers = DuaEmpatGeneratorService.run()
                 session['numbers'] = numbers
-                return ['Dua Empat!!', numbers.__str__()]
+                return ['dua empat!!', numbers.__str__()]
             else:
                 return [f'{text} hasilnya {result:g}']
