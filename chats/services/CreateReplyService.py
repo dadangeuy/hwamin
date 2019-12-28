@@ -1,13 +1,12 @@
 from json import dumps
 
-from requests import post, get
+from requests import post
 
-from accounts.models import Profile
 from commons.patterns import Runnable
 from hwamin.settings import LINE_ACCESS_TOKEN
 
 
-class CreateReplyLineService(Runnable):
+class CreateReplyService(Runnable):
     API = 'https://api.line.me/v2/bot/message/reply'
     HEADERS = {
         'Content-Type': 'application/json',
@@ -22,23 +21,8 @@ class CreateReplyLineService(Runnable):
         messages = [{'type': 'text', 'text': text} for text in texts]
         data = {
             'replyToken': token,
-            'messages': messages,
+            'chats': messages,
             'notificationDisabled': not notification
         }
         response = post(cls.API, dumps(data), headers=cls.HEADERS)
         response.raise_for_status()
-
-
-class RetrieveProfileLineService(Runnable):
-    API = 'https://api.line.me/v2/bot/profile/{0}'
-    HEADERS = {
-        'Content-Type': 'application/json',
-        'Authorization': f'Bearer {LINE_ACCESS_TOKEN}'
-    }
-
-    @classmethod
-    def run(cls, user_id: str) -> Profile:
-        response = get(cls.API.format(user_id), headers=cls.HEADERS)
-        response.raise_for_status()
-        data = response.json()
-        return Profile(id=data['userId'], name=data['displayName'], picture=data['pictureUrl'])
