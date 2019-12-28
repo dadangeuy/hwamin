@@ -57,3 +57,17 @@ class WebhookUserMessageAPI(APIView):
             TextService.run(session, token, text)
 
         return Response(None, HTTP_200_OK)
+
+
+class WebhookGroupMessageAPI(APIView):
+    def post(self, request: Request, group_id: str) -> Response:
+        session = request.session
+        event = request.data
+        token = event['replyToken']
+        message_type = event['message']['type']
+
+        if message_type == 'text':
+            text = event['message']['text']
+            TextService.run(session, token, text)
+
+        return Response(None, HTTP_200_OK)

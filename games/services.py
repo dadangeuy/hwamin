@@ -2,7 +2,7 @@ import ast
 import operator
 import re
 from itertools import permutations
-from typing import Tuple, List, Optional
+from typing import List
 
 from django.contrib.sessions.backends.base import SessionBase
 from factory.fuzzy import FuzzyInteger
@@ -16,13 +16,13 @@ class DuaEmpatGeneratorService(Runnable):
     FUZZY_INTEGER = FuzzyInteger(low=1, high=13)
 
     @classmethod
-    def run(cls) -> Tuple[int, int, int, int]:
-        return (
+    def run(cls) -> List[int]:
+        return [
             cls._get_random_int(),
             cls._get_random_int(),
             cls._get_random_int(),
             cls._get_random_int()
-        )
+        ]
 
     @classmethod
     def _get_random_int(cls) -> int:
@@ -124,15 +124,17 @@ class DuaEmpatReplyService(Runnable):
                 session['numbers'] = numbers
                 messages = ['tidak ada!!', numbers.__str__()]
         else:
-            numbers = session['numbers']
-            result = DuaEmpatCalculatorService.run(numbers, text)
-            is_24 = result == 24
-            if is_24:
-                numbers = DuaEmpatGeneratorService.run()
-                session['numbers'] = numbers
-                messages = ['dua empat!!', numbers.__str__()]
-            else:
-                messages = [f'{text} hasilnya {result:g}']
+            try:
+                numbers = session['numbers']
+                result = DuaEmpatCalculatorService.run(numbers, text)
+                is_24 = result == 24
+                if is_24:
+                    numbers = DuaEmpatGeneratorService.run()
+                    session['numbers'] = numbers
+                    messages = ['dua empat!!', numbers.__str__()]
+                else:
+                    messages = [f'{text} hasilnya {result:g}']
+            except: ...
 
         CreateReplyLineService.run(token, messages)
 
