@@ -1,7 +1,7 @@
 import ast
 import operator
 import re
-from itertools import permutations
+from itertools import permutations, combinations
 from typing import List
 
 from django.contrib.sessions.backends.base import SessionBase
@@ -33,36 +33,33 @@ class DuaEmpatGeneratorService(Runnable):
 
 
 class DuaEmpatSolverService(Runnable):
-    OPERATORS = [
-        operator.add,
-        operator.sub,
-        operator.mul,
-        operator.truediv
-    ]
-    TEXT_BY_OPERATOR = {
-        operator.add: '+',
-        operator.sub: '-',
-        operator.mul: '*',
-        operator.truediv: '/'
+    OPERATOR_BY_NAME = {
+        '+': operator.add,
+        '-': operator.sub,
+        '*': operator.mul,
+        '/': operator.truediv
     }
 
     @classmethod
-    def run(cls, numbers: List[int]) -> str:
-        numbers = sorted(numbers)
-        for numbers in permutations(numbers):
-            for operator_a_b in cls.OPERATORS:
-                for operator_ab_c in cls.OPERATORS:
-                    for operator_abc_d in cls.OPERATORS:
-                        a = numbers[0]
-                        b = numbers[1]
-                        c = numbers[2]
-                        d = numbers[3]
-                        result = operator_abc_d(operator_ab_c(operator_a_b(a, b), c), d)
-                        if result == 24:
-                            a_b_op = cls.TEXT_BY_OPERATOR[operator_a_b]
-                            ab_c_op = cls.TEXT_BY_OPERATOR[operator_ab_c]
-                            abc_d_op = cls.TEXT_BY_OPERATOR[operator_abc_d]
-                            return f'(({a}{a_b_op}{b}){ab_c_op}{c}){abc_d_op}{d}'
+    def run(cls, variables: List[int]) -> str:
+        for v0, v1, v2, v3 in permutations(sorted(variables)):
+            for n0, o0 in cls.OPERATOR_BY_NAME.items():
+                for n1, o1 in cls.OPERATOR_BY_NAME.items():
+                    for n2, o2 in cls.OPERATOR_BY_NAME.items():
+
+                        try:
+                            result = o2(o1(o0(v0, v1), v2), v3)
+                            if result == 24:
+                                return f'(({v0} {n0} {v1}) {n1} {v2}) {n2} {v3}'
+                        except ZeroDivisionError:
+                            ...
+
+                        try:
+                            result = o2(o0(v0, v1), o1(v2, v3))
+                            if result == 24:
+                                return f'({v0} {n0} {v1}) {n2} ({v2} {n1} {v3})'
+                        except ZeroDivisionError:
+                            ...
 
 
 class DuaEmpatCalculatorService(Runnable):
