@@ -32,33 +32,16 @@ class WebhookAPI(APIView):
             event['source']['roomId'] if source_type == 'room' else
             event['source']['userId']
         )
-        url = reverse(f'webhook-{source_type}-api', [source_id], request=request)
+        event_type = event['type']
+        url = reverse(f'webhook-{source_type}-{event_type}-api', [source_id], request=request)
 
         return post(url, event)
 
 
-class WebhookUserAPI(APIView):
+class WebhookUserMessageAPI(APIView):
     def post(self, request: Request, user_id: str) -> Response:
         event = request.data
         token = event['replyToken']
         CreateReplyLineService.run(token, [f'User API {user_id}'])
-
-        return Response(None, HTTP_200_OK)
-
-
-class WebhookGroupAPI(APIView):
-    def post(self, request: Request, group_id: str) -> Response:
-        event = request.data
-        token = event['replyToken']
-        CreateReplyLineService.run(token, [f'Group API {group_id}'])
-
-        return Response(None, HTTP_200_OK)
-
-
-class WebhookRoomAPI(APIView):
-    def post(self, request: Request, room_id: str) -> Response:
-        event = request.data
-        token = event['replyToken']
-        CreateReplyLineService.run(token, [f'Room API {room_id}'])
 
         return Response(None, HTTP_200_OK)
