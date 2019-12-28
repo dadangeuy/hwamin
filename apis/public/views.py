@@ -59,5 +59,5 @@ class WebhookUserMessageAPI(APIView):
     def process_text(self, token: str, text: str) -> None:
         result = DuaEmpatCalculatorService.run(text)
         is_24 = result == 24
-        reply_text = 'Dua Empat!!' if is_24 else f'Kok {result:.2f} :('
+        reply_text = 'Dua Empat!!' if is_24 else f'Kok {result:g} :('
         CreateReplyLineService.run(token, [reply_text])
