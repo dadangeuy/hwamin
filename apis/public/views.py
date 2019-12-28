@@ -1,27 +1,57 @@
-from ast import literal_eval
-
+from requests import post
 from rest_framework.request import Request
 from rest_framework.response import Response
+from rest_framework.reverse import reverse
 from rest_framework.status import HTTP_200_OK
 from rest_framework.views import APIView
 
-from accounts.services import RetrieveProfileService
 from externals.services import CreateReplyLineService
 
 
 class WebhookAPI(APIView):
     def post(self, request: Request) -> Response:
         events = request.data['events']
+
         is_verification = events[0]['replyToken'] == '00000000000000000000000000000000'
+        if is_verification:
+            return Response(None, HTTP_200_OK)
 
-        if not is_verification:
-            for event in events:
-                profile_id = event['source']['userId']
-                profile = RetrieveProfileService.run(profile_id=profile_id)
+        for event in events:
+            source_type = event['source']['type']
+            source_id = (
+                event['source']['groupId'] if source_type == 'group' else
+                event['source']['roomId'] if source_type == 'room' else
+                event['source']['userId']
+            )
 
-                token = event['replyToken']
-                text = event['message']['text']
-                reply_text = literal_eval(text)
-                CreateReplyLineService.run(token, [reply_text])
+            url = reverse(f'webhook-{source_type}-api', [source_id], request=request)
+            post(url, event)
+
+        return Response(None, HTTP_200_OK)
+
+
+class WebhookUserAPI(APIView):
+    def post(self, request: Request, user_id: str) -> Response:
+        event = request.data
+        token = event['replyToken']
+        CreateReplyLineService.run(token, [f'User API {user_id}'])
+
+        return Response(None, HTTP_200_OK)
+
+
+class WebhookGroupAPI(APIView):
+    def post(self, request: Request, group_id: str) -> Response:
+        event = request.data
+        token = event['replyToken']
+        CreateReplyLineService.run(token, [f'Group API {group_id}'])
+
+        return Response(None, HTTP_200_OK)
+
+
+class WebhookRoomAPI(APIView):
+    def post(self, request: Request, room_id: str) -> Response:
+        event = request.data
+        token = event['replyToken']
+        CreateReplyLineService.run(token, [f'Room API {room_id}'])
 
         return Response(None, HTTP_200_OK)
