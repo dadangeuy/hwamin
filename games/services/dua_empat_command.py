@@ -5,7 +5,9 @@ from accounts.services import RetrieveProfileService
 from chats.services import CreateReplyService
 from commons.exceptions import UnknownCommandException
 from commons.patterns import Runnable
-from games.services import DuaEmpatSolverService, DuaEmpatCalculatorService, DuaEmpatGeneratorService
+from games.services.dua_empat_calculator import DuaEmpatCalculatorService
+from games.services.dua_empat_generator import DuaEmpatGeneratorService
+from games.services.dua_empat_solver import DuaEmpatSolverService
 
 
 class DuaEmpatCommandService(Runnable):
