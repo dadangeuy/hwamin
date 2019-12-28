@@ -101,6 +101,8 @@ class DuaEmpatCalculatorService(Runnable):
 class DuaEmpatReplyService(Runnable):
     @classmethod
     def run(cls, session: SessionBase, token: str, text: str) -> None:
+        messages = None
+
         if text == 'udahan':
             session.clear()
             messages = ['game selesai']
