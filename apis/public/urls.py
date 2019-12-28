@@ -1,6 +1,6 @@
 from django.urls import path
 
-from apis.public.views import WebhookAPI, WebhookUserMessageAPI, WebhookGroupMessageAPI
+from apis.public.views import WebhookAPI, WebhookUserMessageAPI, WebhookGroupMessageAPI, WebhookRoomMessageAPI
 
 urlpatterns = [
     path('webhook/', WebhookAPI.as_view()),
@@ -13,5 +13,10 @@ urlpatterns = [
         'webhook/groups/<str:group_id>/events/message/',
         WebhookGroupMessageAPI.as_view(),
         name='webhook-group-message-api'
+    ),
+    path(
+        'webhook/rooms/<str:room_id>/events/message/',
+        WebhookRoomMessageAPI.as_view(),
+        name='webhook-room-message-api'
     ),
 ]
