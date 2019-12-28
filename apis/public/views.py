@@ -1,3 +1,4 @@
+from json import dumps
 from typing import List
 
 from requests import post, Response as APIResponse
@@ -8,9 +9,14 @@ from rest_framework.status import HTTP_200_OK
 from rest_framework.views import APIView
 
 from externals.services import CreateReplyLineService
+from games.services import DuaEmpatCalculatorService
 
 
 class WebhookAPI(APIView):
+    HEADERS = {
+        'Content-Type': 'application/json'
+    }
+
     def post(self, request: Request) -> Response:
         events = request.data['events']
         is_verification = events[0]['replyToken'] == '00000000000000000000000000000000'
@@ -35,13 +41,23 @@ class WebhookAPI(APIView):
         event_type = event['type']
         url = reverse(f'webhook-{source_type}-{event_type}-api', [source_id], request=request)
 
-        return post(url, event)
+        return post(url, dumps(event), headers=self.HEADERS)
 
 
 class WebhookUserMessageAPI(APIView):
     def post(self, request: Request, user_id: str) -> Response:
         event = request.data
         token = event['replyToken']
-        CreateReplyLineService.run(token, [f'User API {user_id}'])
+        message_type = event['message']['type']
+
+        if message_type == 'text':
+            text = event['message']['text']
+            self.process_text(token, text)
 
         return Response(None, HTTP_200_OK)
+
+    def process_text(self, token: str, text: str) -> None:
+        result = DuaEmpatCalculatorService.run(text)
+        is_24 = result == 24
+        reply_text = 'Dua Empat!!' if is_24 else f'Kok {result:.2f} :('
+        CreateReplyLineService.run(token, [reply_text])
