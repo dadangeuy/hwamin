@@ -2,7 +2,7 @@ from django.contrib.sessions.backends.base import SessionBase
 
 from accounts.models import Profile
 from accounts.services import RetrieveProfileService
-from chats.services import CreateReplyService
+from chats.services import CreateTextReplyService
 from commons.exceptions import UnknownCommandException
 from commons.patterns import Runnable
 from games.services.dua_empat_calculator import DuaEmpatCalculatorService
@@ -78,7 +78,7 @@ class DuaEmpatCommandService(Runnable):
             except UnknownCommandException:
                 ...
 
-        CreateReplyService.run(token, messages)
+        CreateTextReplyService.run(token, messages)
 
     @staticmethod
     def _update_scores(session: SessionBase, profile: Profile, score: int) -> None:

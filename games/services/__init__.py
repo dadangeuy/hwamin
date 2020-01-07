@@ -3,3 +3,4 @@ from .dua_empat_generator import DuaEmpatGeneratorService
 from .dua_empat_command import DuaEmpatCommandService
 from .dua_empat_solver import DuaEmpatSolverService
 from .game_command import GameCommandService
+from .werewolf_command import WerewolfCommandService

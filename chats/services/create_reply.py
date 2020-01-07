@@ -14,15 +14,6 @@ class CreateReplyService(Runnable):
     }
 
     @classmethod
-    def run(cls, token: str, texts: list, notification: bool = True) -> None:
-        if texts is None or len(texts) == 0:
-            return
-
-        messages = [{'type': 'text', 'text': text} for text in texts]
-        data = {
-            'replyToken': token,
-            'messages': messages,
-            'notificationDisabled': not notification
-        }
+    def run(cls, data: dict) -> None:
         response = post(cls.API, dumps(data), headers=cls.HEADERS)
         response.raise_for_status()
