@@ -1,4 +1,4 @@
-from asyncio import new_event_loop, coroutine
+from asyncio import new_event_loop, coroutine, get_event_loop
 
 from django.http import HttpRequest
 from rest_framework.request import Request
@@ -6,7 +6,6 @@ from rest_framework.views import APIView
 
 
 class AsyncAPIView(APIView):
-    loop = new_event_loop()
 
     def dispatch(self, request: HttpRequest, *args, **kwargs):
         """
@@ -25,7 +24,8 @@ class AsyncAPIView(APIView):
             handler = self._get_handler(request)
             if handler is not None:
                 future_response = handler(request, *args, **kwargs)
-                response = self.loop.run_until_complete(future_response)
+                loop = new_event_loop()
+                response = loop.run_until_complete(future_response)
             else:
                 response = self.http_method_not_allowed(request, *args, **kwargs)
         except Exception as e:

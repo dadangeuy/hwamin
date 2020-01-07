@@ -17,7 +17,7 @@ class WebhookUserMessageView(AsyncAPIView):
 
         if message_type == 'text':
             text = event['message']['text']
-            profile = RetrieveProfileService.run(user_id=user_id)
-            GameCommandService.run(session, token, text, profile)
+            profile = await RetrieveProfileService.run_async(user_id=user_id)
+            await GameCommandService.run_async(session, token, text, profile)
 
         return Response(None, HTTP_200_OK)
