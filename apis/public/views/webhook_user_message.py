@@ -1,14 +1,15 @@
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.status import HTTP_200_OK
-from rest_framework.views import APIView
 
 from accounts.services import RetrieveProfileService
+from commons.views import AsyncAPIView
 from games.services import GameCommandService
 
 
-class WebhookUserMessageView(APIView):
-    def post(self, request: Request, user_id: str) -> Response:
+class WebhookUserMessageView(AsyncAPIView):
+
+    async def post(self, request: Request, user_id: str) -> Response:
         session = request.session
         event = request.data
         token = event['replyToken']
