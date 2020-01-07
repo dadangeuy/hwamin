@@ -148,5 +148,5 @@ LOGGING = {
 # Line bot configuration
 # https://developers.line.biz/console/
 
-LINE_CHANNEL_SECRET = os.getenv('LINE_CHANNEL_SECRET')
-LINE_ACCESS_TOKEN = os.getenv('LINE_ACCESS_TOKEN')
+CHANNEL_SECRET = os.getenv('CHANNEL_SECRET')
+CHANNEL_ACCESS_TOKEN = os.getenv('CHANNEL_ACCESS_TOKEN')

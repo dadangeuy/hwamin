@@ -3,14 +3,14 @@ from json import dumps
 from requests import post
 
 from commons.patterns import Runnable
-from hwamin.settings import LINE_ACCESS_TOKEN
+from hwamin.settings import CHANNEL_ACCESS_TOKEN
 
 
 class CreateReplyService(Runnable):
     API = 'https://api.line.me/v2/bot/message/reply'
     HEADERS = {
         'Content-Type': 'application/json',
-        'Authorization': f'Bearer {LINE_ACCESS_TOKEN}'
+        'Authorization': f'Bearer {CHANNEL_ACCESS_TOKEN}'
     }
 
     @classmethod

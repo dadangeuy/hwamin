@@ -3,13 +3,13 @@ from requests import get
 
 from accounts.models import Profile
 from commons.patterns import Runnable
-from hwamin.settings import LINE_ACCESS_TOKEN
+from hwamin.settings import CHANNEL_ACCESS_TOKEN
 
 
 class RetrieveProfileService(Runnable):
     HEADERS = {
         'Content-Type': 'application/json',
-        'Authorization': f'Bearer {LINE_ACCESS_TOKEN}'
+        'Authorization': f'Bearer {CHANNEL_ACCESS_TOKEN}'
     }
     USER_API = 'https://api.line.me/v2/bot/profile/{0}'
     GROUP_API = 'https://api.line.me/v2/bot/group/{0}/member/{1}'
