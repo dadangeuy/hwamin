@@ -3,7 +3,11 @@ from django.urls import path
 from apis.public.views import WebhookView, WebhookUserMessageView, WebhookGroupMessageView, WebhookRoomMessageView
 
 urlpatterns = [
-    path('webhook/', WebhookView.as_view()),
+    path(
+        'webhook/',
+        WebhookView.as_view(),
+        name='webhook'
+    ),
     path(
         'webhook/users/<str:user_id>/events/message/',
         WebhookUserMessageView.as_view(),
