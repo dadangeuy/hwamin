@@ -1,17 +1,18 @@
-from json import dumps
 from typing import List
 
-from requests import Response as APIResponse
+from rapidjson import dumps
+from requests import Response as APIResponse, post
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.reverse import reverse
 from rest_framework.status import HTTP_200_OK
 from rest_framework.views import APIView
 
-from sessions.services import RetrieveSessionService
-
 
 class WebhookView(APIView):
+    HEADERS = {
+        'Content-Type': 'application/json',
+    }
 
     def post(self, request: Request) -> Response:
         events = request.data['events']
@@ -36,7 +37,9 @@ class WebhookView(APIView):
             event['source']['userId']
         )
         event_type = event['type']
-        url = reverse(f'webhook-{source_type}-{event_type}', [source_id], request=request)
-        session = RetrieveSessionService.run(source_id)
 
-        return session.post(url, dumps(event))
+        url = reverse(f'webhook-{source_type}-{event_type}', [source_id], request=request)
+        data = dumps(event)
+        response = post(url, data, headers=self.HEADERS)
+
+        return response

@@ -33,6 +33,6 @@ class CommandService(Runnable):
             elif text.startswith('main'):
                 if text == 'main 24':
                     PlayService.start(source_id, Play.Game.DUA_EMPAT)
-                    DuaEmpatApplication.start(source_id)
+                    messages = DuaEmpatApplication.start(source_id)
 
         ChatApplication.reply(token, messages)
