@@ -1,8 +1,8 @@
 from typing import List
 
-from commons.exceptions import UnknownCommandException
+from common.exceptions import UnknownCommandException
 from dua_empat.services import QuestionService, AnswerService
-from games.services.score import ScoreService
+from game.services.score import ScoreService
 
 
 class DuaEmpatApplication:

@@ -7,7 +7,7 @@ from typing import Optional
 from rest_framework.generics import get_object_or_404
 from simpleeval import SimpleEval
 
-from commons.exceptions import UnknownCommandException
+from common.exceptions import UnknownCommandException
 from dua_empat.models import Question
 
 
