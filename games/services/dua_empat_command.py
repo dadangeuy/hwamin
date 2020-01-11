@@ -4,8 +4,8 @@ from accounts.models import Profile
 from chats.services import CreateTextReplyService
 from commons.exceptions import UnknownCommandException
 from commons.patterns import Runnable
+from duaempat.services import QuestionService
 from games.services.dua_empat_calculator import DuaEmpatCalculatorService
-from games.services.dua_empat_generator import DuaEmpatGeneratorService
 from games.services.dua_empat_solver import DuaEmpatSolverService
 from games.services.score import ScoreService
 
@@ -17,59 +17,66 @@ class DuaEmpatCommandService(Runnable):
 
         if text == 'main 24':
             session.clear()
-            session['question'] = DuaEmpatGeneratorService.run()
             session['game'] = 'DUA_EMPAT'
-            session['scoreboard'] = {}
+
+            question = QuestionService.get_new_question(source_id)
 
             messages.append('game dimulai')
-            messages.append(session['question'].__str__())
+            messages.append(question.display_numbers)
 
         if text == 'udahan':
             session.clear()
             ScoreService.clear(source_id)
+            QuestionService.clear(source_id)
 
             messages.append('game selesai')
 
         elif text == 'nyerah':
-            answer = DuaEmpatSolverService.run(session['question']) or 'tidak ada'
-            cls._update_scores(source_id, profile, -1)
-            cls._create_new_question(session)
+            question = QuestionService.get_question(source_id)
+            answer = DuaEmpatSolverService.run(question.numbers) or 'tidak ada'
+
+            ScoreService.add_point(source_id, profile.id, -1)
+            new_question = QuestionService.get_new_question(source_id)
+
+            score_info = ScoreService.get_info(source_id)
 
             messages.append(f'jawabannya {answer}')
-            messages.append(cls._get_scoreboard(source_id))
-            messages.append(session['question'].__str__())
+            messages.append(score_info)
+            messages.append(new_question)
 
         elif text == 'tidak ada':
-            answer = DuaEmpatSolverService.run(session['question'])
+            question = QuestionService.get_question(source_id)
+            answer = DuaEmpatSolverService.run(question.numbers)
 
             if answer is None:
-                cls._update_scores(source_id, profile, 1)
-                cls._create_new_question(session)
+                ScoreService.add_point(source_id, profile.id, 1)
+                question = QuestionService.get_new_question(source_id)
 
-                messages.append('tidak ada!!')
-                messages.append(cls._get_scoreboard(source_id))
-                messages.append(session['question'].__str__())
+                score_info = ScoreService.get_info(source_id)
+
+                messages.append(score_info)
+                messages.append(question.display_numbers)
 
             else:
-                cls._update_scores(source_id, profile, -1)
+                ScoreService.add_point(source_id, profile.id, -1)
 
                 messages.append('ada jawabannya loh')
 
         else:
             try:
-                numbers = session['question']
-                result = DuaEmpatCalculatorService.run(numbers, text)
+                question = QuestionService.get_question(source_id)
+                result = DuaEmpatCalculatorService.run(question.numbers, text)
 
                 if result == 24:
-                    cls._update_scores(source_id, profile, 1)
-                    cls._create_new_question(session)
+                    ScoreService.add_point(source_id, profile.id, 1)
+                    new_question = QuestionService.get_new_question(source_id)
+                    score_info = ScoreService.get_info(source_id)
 
-                    messages.append('dua empat!!')
-                    messages.append(cls._get_scoreboard(source_id))
-                    messages.append(session['question'].__str__())
+                    messages.append(score_info)
+                    messages.append(new_question.display_numbers)
 
                 else:
-                    cls._update_scores(source_id, profile, -1)
+                    ScoreService.add_point(source_id, profile.id, -1)
 
                     messages.append(f'{text} hasilnya {result:g}')
 
@@ -77,16 +84,3 @@ class DuaEmpatCommandService(Runnable):
                 ...
 
         CreateTextReplyService.run(token, messages)
-
-    @staticmethod
-    def _update_scores(source_id: str, profile: Profile, score: int) -> None:
-        ScoreService.add_point(source_id, profile.id, score)
-
-    @staticmethod
-    def _create_new_question(session: SessionBase) -> None:
-        question = DuaEmpatGeneratorService.run()
-        session['question'] = question
-
-    @staticmethod
-    def _get_scoreboard(source_id: str) -> str:
-        return ScoreService.get_info(source_id)

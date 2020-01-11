@@ -1,5 +1,4 @@
-from json import dumps
-
+from rapidjson import dumps
 from requests import post
 
 from commons.patterns import Runnable

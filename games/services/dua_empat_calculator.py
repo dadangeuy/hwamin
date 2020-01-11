@@ -1,7 +1,7 @@
 import ast
 import operator
 import re
-from typing import List
+from typing import Iterable
 
 from simpleeval import SimpleEval
 
@@ -19,12 +19,12 @@ class DuaEmpatCalculatorService(Runnable):
     EVAL = SimpleEval(operators=OPERATORS)
 
     @classmethod
-    def run(cls, numbers: List[int], text: str) -> bool:
+    def run(cls, numbers: Iterable[int], text: str) -> bool:
         cls._validate(numbers, text)
         return cls.EVAL.eval(text)
 
     @classmethod
-    def _validate(cls, numbers: List[int], text: str) -> None:
+    def _validate(cls, numbers: Iterable[int], text: str) -> None:
         cls._validate_formula(text)
         cls._validate_numbers(numbers, text)
 
@@ -35,10 +35,10 @@ class DuaEmpatCalculatorService(Runnable):
             raise UnknownCommandException
 
     @staticmethod
-    def _validate_numbers(numbers: List[int], text: str):
+    def _validate_numbers(numbers: Iterable[int], text: str):
         text_numbers = re.split(r'[^0-9]', text)
         text_numbers = filter(None, text_numbers)
-        text_numbers = [int(text) for text in text_numbers]
+        text_numbers = (int(text) for text in text_numbers)
         numbers = sorted(numbers)
         text_numbers = sorted(text_numbers)
         if numbers != text_numbers:
