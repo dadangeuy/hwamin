@@ -1,4 +1,3 @@
-from accounts.models import Profile
 from chats.application import ChatApplication
 from commons.patterns import Runnable
 from dua_empat.application import DuaEmpatApplication
@@ -13,7 +12,7 @@ class CommandService(Runnable):
             token: str,
             text: str,
             source_id: str,
-            profile: Profile
+            profile_id: str
     ) -> None:
         text = text.lower()
         game_id = PlayService.get_game_id(source_id)
@@ -27,7 +26,7 @@ class CommandService(Runnable):
                     PlayService.end(source_id)
                     messages = DuaEmpatApplication.end(source_id)
                 else:
-                    messages = DuaEmpatApplication.reply(source_id, profile.id, text)
+                    messages = DuaEmpatApplication.reply(source_id, profile_id, text)
         else:
             if text == 'menu':
                 messages = ['main 24']

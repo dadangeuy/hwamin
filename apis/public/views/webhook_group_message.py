@@ -4,7 +4,7 @@ from rest_framework.status import HTTP_200_OK
 from rest_framework.views import APIView
 
 from accounts.services import RetrieveProfileService
-from games.services import CommandService
+from games.application import GameApplication
 
 
 class WebhookGroupMessageView(APIView):
@@ -19,6 +19,6 @@ class WebhookGroupMessageView(APIView):
         if message_type == 'text':
             profile = RetrieveProfileService.run(user_id=user_id, group_id=group_id)
             text = event['message']['text']
-            CommandService.run(token, text, source_id, profile)
+            GameApplication.run_command(source_id, profile.id, text, token)
 
         return Response(None, HTTP_200_OK)
