@@ -14,10 +14,11 @@ class WebhookUserMessageView(APIView):
         event = request.data
         token = event['replyToken']
         message_type = event['message']['type']
+        source_id = event['source']['userId']
 
         if message_type == 'text':
             text = event['message']['text']
             profile = RetrieveProfileService.run(user_id=user_id)
-            GameCommandService.run(session, token, text, profile)
+            GameCommandService.run(session, token, text, source_id, profile)
 
         return Response(None, HTTP_200_OK)

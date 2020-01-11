@@ -15,10 +15,11 @@ class WebhookGroupMessageView(APIView):
         user_id = event['source']['userId']
         token = event['replyToken']
         message_type = event['message']['type']
+        source_id = event['source']['groupId']
 
         if message_type == 'text':
             profile = RetrieveProfileService.run(user_id=user_id, group_id=group_id)
             text = event['message']['text']
-            GameCommandService.run(session, token, text, profile)
+            GameCommandService.run(session, token, text, source_id, profile)
 
         return Response(None, HTTP_200_OK)

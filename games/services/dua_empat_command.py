@@ -1,18 +1,18 @@
 from django.contrib.sessions.backends.base import SessionBase
 
 from accounts.models import Profile
-from accounts.services import RetrieveProfileService
 from chats.services import CreateTextReplyService
 from commons.exceptions import UnknownCommandException
 from commons.patterns import Runnable
 from games.services.dua_empat_calculator import DuaEmpatCalculatorService
 from games.services.dua_empat_generator import DuaEmpatGeneratorService
 from games.services.dua_empat_solver import DuaEmpatSolverService
+from games.services.score import ScoreService
 
 
 class DuaEmpatCommandService(Runnable):
     @classmethod
-    def run(cls, session: SessionBase, token: str, text: str, profile: Profile) -> None:
+    def run(cls, session: SessionBase, token: str, text: str, source_id: str, profile: Profile) -> None:
         messages = []
 
         if text == 'main 24':
@@ -26,34 +26,32 @@ class DuaEmpatCommandService(Runnable):
 
         if text == 'udahan':
             session.clear()
+            ScoreService.clear(source_id)
 
             messages.append('game selesai')
 
-        elif text == 'ulang':
-            messages.append(session['question'].__str__())
-
         elif text == 'nyerah':
             answer = DuaEmpatSolverService.run(session['question']) or 'tidak ada'
-            cls._update_scores(session, profile, -1)
+            cls._update_scores(source_id, profile, -1)
             cls._create_new_question(session)
 
             messages.append(f'jawabannya {answer}')
-            messages.append(cls._get_scoreboard(session))
+            messages.append(cls._get_scoreboard(source_id))
             messages.append(session['question'].__str__())
 
         elif text == 'tidak ada':
             answer = DuaEmpatSolverService.run(session['question'])
 
             if answer is None:
-                cls._update_scores(session, profile, 1)
+                cls._update_scores(source_id, profile, 1)
                 cls._create_new_question(session)
 
                 messages.append('tidak ada!!')
-                messages.append(cls._get_scoreboard(session))
+                messages.append(cls._get_scoreboard(source_id))
                 messages.append(session['question'].__str__())
 
             else:
-                cls._update_scores(session, profile, -1)
+                cls._update_scores(source_id, profile, -1)
 
                 messages.append('ada jawabannya loh')
 
@@ -63,15 +61,15 @@ class DuaEmpatCommandService(Runnable):
                 result = DuaEmpatCalculatorService.run(numbers, text)
 
                 if result == 24:
-                    cls._update_scores(session, profile, 1)
+                    cls._update_scores(source_id, profile, 1)
                     cls._create_new_question(session)
 
                     messages.append('dua empat!!')
-                    messages.append(cls._get_scoreboard(session))
+                    messages.append(cls._get_scoreboard(source_id))
                     messages.append(session['question'].__str__())
 
                 else:
-                    cls._update_scores(session, profile, -1)
+                    cls._update_scores(source_id, profile, -1)
 
                     messages.append(f'{text} hasilnya {result:g}')
 
@@ -81,11 +79,8 @@ class DuaEmpatCommandService(Runnable):
         CreateTextReplyService.run(token, messages)
 
     @staticmethod
-    def _update_scores(session: SessionBase, profile: Profile, score: int) -> None:
-        scoreboard = session['scoreboard']
-        current_score = scoreboard.get(profile.id, 0)
-        scoreboard[profile.id] = current_score + score
-        session['score'] = scoreboard
+    def _update_scores(source_id: str, profile: Profile, score: int) -> None:
+        ScoreService.add_point(source_id, profile.id, score)
 
     @staticmethod
     def _create_new_question(session: SessionBase) -> None:
@@ -93,13 +88,5 @@ class DuaEmpatCommandService(Runnable):
         session['question'] = question
 
     @staticmethod
-    def _get_scoreboard(session: SessionBase) -> str:
-        scoreboard = session['scoreboard']
-        header_text = '[SCOREBOARD]\n'
-        score_texts = [
-            f'{RetrieveProfileService.run(profile_id).name}: {score}'
-            for profile_id, score in scoreboard.items()
-        ]
-        score_text = '\n'.join(score_texts)
-
-        return header_text + score_text
+    def _get_scoreboard(source_id: str) -> str:
+        return ScoreService.get_info(source_id)

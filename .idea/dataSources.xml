@@ -6,7 +6,7 @@
       <synchronize>true</synchronize>
       <rewrite-bounds>false</rewrite-bounds>
       <jdbc-driver>org.postgresql.Driver</jdbc-driver>
-      <jdbc-url>jdbc:postgresql://103.129.223.234:10001/hwamin</jdbc-url>
+      <jdbc-url>jdbc:postgresql://rizaldi.xyz:5432/hwamin</jdbc-url>
       <auto-close enable="true" />
     </data-source>
   </component>
