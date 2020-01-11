@@ -8,7 +8,7 @@ from rest_framework.generics import get_object_or_404
 from simpleeval import SimpleEval
 
 from commons.exceptions import UnknownCommandException
-from duaempat.models import Question
+from dua_empat.models import Question
 
 
 class AnswerService:

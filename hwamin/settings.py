@@ -41,7 +41,7 @@ INSTALLED_APPS = [
     'apis',
     'accounts',
     'games',
-    'duaempat',
+    'dua_empat',
 ]
 
 MIDDLEWARE = [

@@ -6,7 +6,7 @@ from accounts.models import Profile
 from chats.services import CreateTextReplyService
 from commons.exceptions import UnknownCommandException
 from commons.patterns import Runnable
-from duaempat.services import QuestionService, AnswerService
+from dua_empat.services import QuestionService, AnswerService
 from games.services.score import ScoreService
 
 

@@ -1,6 +1,6 @@
 from factory.fuzzy import FuzzyInteger
 
-from duaempat.models.question import Question
+from dua_empat.models.question import Question
 
 
 class QuestionService:
