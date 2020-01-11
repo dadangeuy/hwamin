@@ -3,7 +3,7 @@ from rest_framework.response import Response
 from rest_framework.status import HTTP_200_OK
 from rest_framework.views import APIView
 
-from account.services import RetrieveProfileService
+from account.application import AccountApplication
 from game.application import GameApplication
 
 
@@ -17,7 +17,7 @@ class WebhookRoomMessageView(APIView):
         source_id = event['source']['roomId']
 
         if message_type == 'text':
-            profile = RetrieveProfileService.run(user_id=user_id, room_id=room_id)
+            profile = AccountApplication.retrieve_profile(user_id=user_id, room_id=room_id)
             text = event['message']['text']
             GameApplication.run_command(source_id, profile.id, text, token)
 
