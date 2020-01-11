@@ -1,3 +1,1 @@
-from .dua_empat_command import DuaEmpatCommandService
-from .game_command import GameCommandService
-from .werewolf_command import WerewolfCommandService
+from .command import CommandService
