@@ -7,21 +7,17 @@ from chats.services import CreateTextReplyService
 from commons.exceptions import UnknownCommandException
 from commons.patterns import Runnable
 from dua_empat.services import QuestionService, AnswerService
+from games.models import Play
+from games.services.play import PlayService
 from games.services.score import ScoreService
 
 
 class DuaEmpatCommandService(Runnable):
     @classmethod
-    def run(cls, session: SessionBase, token: str, text: str, source_id: str, profile: Profile) -> None:
+    def run(cls, token: str, text: str, source_id: str, profile: Profile) -> None:
         if text == 'main 24':
-            session.clear()
-            session['game'] = 'DUA_EMPAT'
-            
             messages = cls._start(source_id)
         elif text == 'udahan':
-            session.clear()
-            ScoreService.clear(source_id)
-
             messages = cls._end(source_id)
         elif text == 'ulang':
             messages = cls._retry(source_id)
@@ -34,6 +30,7 @@ class DuaEmpatCommandService(Runnable):
         
     @classmethod
     def _start(cls, source_id: str) -> List[str]:
+        PlayService.start(source_id, Play.Game.DUA_EMPAT)
         question = QuestionService.get_new_question(source_id)
         return ['game dimulai', question.display_numbers]
 
@@ -42,6 +39,7 @@ class DuaEmpatCommandService(Runnable):
         score_info = ScoreService.get_info(source_id)
         ScoreService.clear(source_id)
         QuestionService.clear(source_id)
+        PlayService.end(source_id)
         return [score_info, 'game selesai']
 
     @classmethod

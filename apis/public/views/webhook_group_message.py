@@ -10,7 +10,6 @@ from games.services import GameCommandService
 class WebhookGroupMessageView(APIView):
 
     def post(self, request: Request, group_id: str) -> Response:
-        session = request.session
         event = request.data
         user_id = event['source']['userId']
         token = event['replyToken']
@@ -20,6 +19,6 @@ class WebhookGroupMessageView(APIView):
         if message_type == 'text':
             profile = RetrieveProfileService.run(user_id=user_id, group_id=group_id)
             text = event['message']['text']
-            GameCommandService.run(session, token, text, source_id, profile)
+            GameCommandService.run(token, text, source_id, profile)
 
         return Response(None, HTTP_200_OK)
