@@ -1,5 +1,5 @@
 from accounts.models import Profile
-from chats.services import CreateTextReplyService
+from chats.application import ChatApplication
 from commons.patterns import Runnable
 from dua_empat.application import DuaEmpatApplication
 from .play import PlayService
@@ -36,4 +36,4 @@ class CommandService(Runnable):
                     PlayService.start(source_id, Play.Game.DUA_EMPAT)
                     DuaEmpatApplication.start(source_id)
 
-        CreateTextReplyService.run(token, messages)
+        ChatApplication.reply(token, messages)
