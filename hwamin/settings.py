@@ -73,6 +73,8 @@ TEMPLATES = [
     },
 ]
 
+WSGI_APPLICATION = 'hwamin.wsgi.application'
+
 ASGI_APPLICATION = 'hwamin.asgi.application'
 
 # Database
