@@ -35,4 +35,4 @@ class CommandService(Runnable):
                     PlayService.start(source_id, Play.Game.DUA_EMPAT)
                     messages = DuaEmpatApplication.start(source_id)
 
-        ChatApplication.reply(token, messages)
+        ChatApplication.send_text_reply(token, messages)

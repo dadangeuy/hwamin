@@ -6,5 +6,5 @@ from chat.services import CreateTextReplyService
 class ChatApplication:
 
     @classmethod
-    def reply(cls, token: str, messages: List[str]) -> None:
-        CreateTextReplyService.run(token, messages)
+    def send_text_reply(cls, token: str, text_messages: List[str]) -> None:
+        CreateTextReplyService.run(token, text_messages)
