@@ -17,7 +17,7 @@ class WebhookRoomMessageView(APIView):
         source_id = event['source']['roomId']
 
         if message_type == 'text':
-            profile = AccountApplication.retrieve_profile(user_id=user_id, room_id=room_id)
+            profile = AccountApplication.get_profile(user_id=user_id, room_id=room_id)
             text = event['message']['text']
             GameApplication.run_command(source_id, profile.id, text, token)
 

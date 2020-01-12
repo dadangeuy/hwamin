@@ -16,7 +16,7 @@ class WebhookUserMessageView(APIView):
         source_id = event['source']['userId']
 
         if message_type == 'text':
-            profile = AccountApplication.retrieve_profile(user_id=user_id)
+            profile = AccountApplication.get_profile(user_id=user_id)
             text = event['message']['text']
             GameApplication.run_command(source_id, profile.id, text, token)
 
