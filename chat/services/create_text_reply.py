@@ -15,10 +15,10 @@ class CreateTextReplyService(Runnable):
     }
 
     @classmethod
-    def run(cls, token: str, text_messages: List[str], notification: bool = True) -> None:
-        has_message = text_messages is not None and len(text_messages) > 0
-        if has_message:
-            messages = [{'type': 'text', 'text': text} for text in text_messages]
+    def run(cls, token: str, texts: List[str], notification: bool = True) -> None:
+        has_text = texts is not None and len(texts) > 0
+        if has_text:
+            messages = [{'type': 'text', 'text': text} for text in texts]
             data = {
                 'replyToken': token,
                 'messages': messages,
