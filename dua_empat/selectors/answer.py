@@ -6,11 +6,10 @@ from rest_framework.generics import get_object_or_404
 from simpleeval import SimpleEval
 
 from common.exceptions import UnknownCommandException
-from common.patterns import Runnable
 from dua_empat.models import Question
 
 
-class GetAndValidateSolutionService(Runnable):
+class AnswerSelector:
     _operators = {
         ast.Add: operator.add,
         ast.Sub: operator.sub,
@@ -20,7 +19,7 @@ class GetAndValidateSolutionService(Runnable):
     _evaluator = SimpleEval(operators=_operators)
 
     @classmethod
-    def run(cls, source_id: str, text: str) -> int:
+    def get_and_validate_answer(cls, source_id: str, text: str) -> int:
         question = get_object_or_404(Question, source_id=source_id)
 
         cls._validate_formula(text)

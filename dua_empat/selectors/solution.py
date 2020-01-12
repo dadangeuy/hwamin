@@ -4,11 +4,10 @@ from typing import Optional
 
 from rest_framework.generics import get_object_or_404
 
-from common.patterns import Runnable
 from dua_empat.models import Question
 
 
-class GetSolutionService(Runnable):
+class SolutionSelector:
     _operator_by_text = {
         '+': operator.add,
         '-': operator.sub,
@@ -17,7 +16,7 @@ class GetSolutionService(Runnable):
     }
 
     @classmethod
-    def run(cls, source_id: str) -> Optional[str]:
+    def get_solution(cls, source_id: str) -> Optional[str]:
         question = get_object_or_404(Question, source_id=source_id)
         variables = question.numbers
 

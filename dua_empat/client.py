@@ -1,12 +1,8 @@
 from typing import List
 
 from common.exceptions import UnknownCommandException
-from dua_empat.services import (
-    GetQuestionService,
-    GetSolutionService,
-    GetAndValidateSolutionService,
-    UpdateOrCreateQuestionService
-)
+from dua_empat.selectors import AnswerSelector, QuestionSelector, SolutionSelector
+from dua_empat.services import UpdateOrCreateQuestionService
 from session.client import SessionClient
 
 
@@ -33,12 +29,12 @@ class DuaEmpatClient:
 
     @classmethod
     def _retry(cls, source_id: str) -> List[str]:
-        question = GetQuestionService.run(source_id)
+        question = QuestionSelector.get_question(source_id)
         return [question.display_numbers]
 
     @classmethod
     def _give_up(cls, source_id: str) -> List[str]:
-        answer = GetSolutionService.run(source_id) or 'tidak ada'
+        answer = SolutionSelector.get_solution(source_id) or 'tidak ada'
         score_board = SessionClient.get_score_board(source_id)
         question = UpdateOrCreateQuestionService.run(source_id)
         return [f'jawabannya {answer}', score_board, question.display_numbers]
@@ -46,7 +42,7 @@ class DuaEmpatClient:
     @classmethod
     def _try_answer(cls, source_id: str, profile_id: str, text: str) -> List[str]:
         if text == 'tidak ada':
-            answer = GetSolutionService.run(source_id)
+            answer = SolutionSelector.get_solution(source_id)
             is_correct = answer is None
 
             if is_correct:
@@ -61,7 +57,7 @@ class DuaEmpatClient:
 
         else:
             try:
-                result = GetAndValidateSolutionService.run(source_id, text)
+                result = AnswerSelector.get_and_validate_answer(source_id, text)
                 is_correct = result == 24
 
                 if is_correct:
