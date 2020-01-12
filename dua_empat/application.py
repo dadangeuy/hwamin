@@ -1,14 +1,19 @@
 from typing import List
 
 from common.exceptions import UnknownCommandException
-from dua_empat.services import QuestionService, AnswerService
+from dua_empat.services import (
+    GetQuestionService,
+    GetSolutionService,
+    GetAndValidateSolutionService,
+    UpdateOrCreateQuestionService
+)
 from session import SessionApplication
 
 
 class DuaEmpatApplication:
     @classmethod
     def start(cls, source_id: str) -> List[str]:
-        question = QuestionService.get_new_question(source_id)
+        question = UpdateOrCreateQuestionService.run(source_id)
         return ['game dimulai', question.display_numbers]
 
     @classmethod
@@ -27,26 +32,26 @@ class DuaEmpatApplication:
 
     @classmethod
     def _retry(cls, source_id: str) -> List[str]:
-        question = QuestionService.get_question(source_id)
+        question = GetQuestionService.run(source_id)
         return [question.display_numbers]
 
     @classmethod
     def _give_up(cls, source_id: str) -> List[str]:
-        answer = AnswerService.get_answer(source_id) or 'tidak ada'
+        answer = GetSolutionService.run(source_id) or 'tidak ada'
         score_info = SessionApplication.get_score_info(source_id)
-        question = QuestionService.get_new_question(source_id)
+        question = UpdateOrCreateQuestionService.run(source_id)
         return [f'jawabannya {answer}', score_info, question.display_numbers]
 
     @classmethod
     def _try_answer(cls, source_id: str, profile_id: str, text: str) -> List[str]:
         if text == 'tidak ada':
-            answer = AnswerService.get_answer(source_id)
+            answer = GetSolutionService.run(source_id)
             is_correct = answer is None
 
             if is_correct:
                 SessionApplication.add_point(source_id, profile_id, 1)
                 score_info = SessionApplication.get_score_info(source_id)
-                question = QuestionService.get_new_question(source_id)
+                question = UpdateOrCreateQuestionService.run(source_id)
                 return [score_info, question.display_numbers]
 
             else:
@@ -55,14 +60,13 @@ class DuaEmpatApplication:
 
         else:
             try:
-                AnswerService.validate_answer(source_id, text)
-                result = AnswerService.get_result(text)
+                result = GetAndValidateSolutionService.run(source_id, text)
                 is_correct = result == 24
 
                 if is_correct:
                     SessionApplication.add_point(source_id, profile_id, 1)
                     score_info = SessionApplication.get_score_info(source_id)
-                    question = QuestionService.get_new_question(source_id)
+                    question = UpdateOrCreateQuestionService.run(source_id)
                     return [score_info, question.display_numbers]
 
                 else:

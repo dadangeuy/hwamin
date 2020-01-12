@@ -1,18 +1,14 @@
 from factory.fuzzy import FuzzyInteger
 
-from dua_empat.models.question import Question
+from common.patterns import Runnable
+from dua_empat.models import Question
 
 
-class QuestionService:
+class UpdateOrCreateQuestionService(Runnable):
     number_factory = FuzzyInteger(low=0, high=13)
 
     @classmethod
-    def get_question(cls, source_id: str) -> Question:
-        question = Question.objects.filter(source_id=source_id).first()
-        return question
-
-    @classmethod
-    def get_new_question(cls, source_id: str) -> Question:
+    def run(cls, source_id: str) -> Question:
         question, _ = Question.objects.update_or_create(
             source_id=source_id,
             defaults={
@@ -23,7 +19,3 @@ class QuestionService:
             }
         )
         return question
-
-    @classmethod
-    def clear(cls, source_id: str) -> None:
-        Question.objects.filter(source_id=source_id)
