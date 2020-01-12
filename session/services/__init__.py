@@ -1,2 +1,4 @@
+from .delete_score import DeleteScoreService
+from .get_score_board import GetScoreBoardService
 from .play import PlayService
-from .score import ScoreService
+from .update_score import UpdateScoreService
