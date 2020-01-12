@@ -7,7 +7,7 @@ from dua_empat.services import (
     GetAndValidateSolutionService,
     UpdateOrCreateQuestionService
 )
-from session import SessionApplication
+from session.application import SessionApplication
 
 
 class DuaEmpatApplication:

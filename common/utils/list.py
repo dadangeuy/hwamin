@@ -1,5 +1,5 @@
 from collections import defaultdict
-from typing import List, Callable, Dict, TypeVar
+from typing import TypeVar, List, Callable, Dict
 
 
 class ListUtil:

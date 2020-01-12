@@ -1,6 +1,6 @@
-from chat import ChatApplication
-from dua_empat import DuaEmpatApplication
-from session import SessionApplication
+from chat.application import ChatApplication
+from dua_empat.application import DuaEmpatApplication
+from session.application import SessionApplication
 
 
 class CommandApplication:
