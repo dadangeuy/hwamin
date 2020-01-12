@@ -1,4 +1,4 @@
-from game.services import DuaEmpatSolverService
+from session.services import DuaEmpatSolverService
 
 
 class TestDuaEmpatSolverService:

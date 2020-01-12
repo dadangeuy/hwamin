@@ -1,7 +1,7 @@
 from django.db import transaction
 from django.db.models import F
 
-from game.models import Score
+from session.models import Score
 
 
 class ScoreService:

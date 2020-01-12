@@ -4,7 +4,7 @@ from rest_framework.status import HTTP_200_OK
 from rest_framework.views import APIView
 
 from account.application import AccountApplication
-from game.application import GameApplication
+from command.application import CommandApplication
 
 
 class WebhookUserMessageView(APIView):
@@ -18,6 +18,6 @@ class WebhookUserMessageView(APIView):
         if message_type == 'text':
             profile = AccountApplication.get_profile(user_id=user_id)
             text = event['message']['text']
-            GameApplication.run_command(source_id, profile.id, text, token)
+            CommandApplication.run_command(source_id, profile.id, text, token)
 
         return Response(None, HTTP_200_OK)

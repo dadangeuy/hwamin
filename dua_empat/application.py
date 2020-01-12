@@ -2,7 +2,7 @@ from typing import List
 
 from common.exceptions import UnknownCommandException
 from dua_empat.services import QuestionService, AnswerService
-from game.services.score import ScoreService
+from session.services.score import ScoreService
 
 
 class DuaEmpatApplication:
@@ -18,6 +18,7 @@ class DuaEmpatApplication:
 
     @classmethod
     def reply(cls, source_id: str, profile_id: str, text: str) -> List[str]:
+        text = text.lower()
         return (
             cls._retry(source_id) if text == 'ulang' else
             cls._give_up(source_id) if text == 'nyerah' else

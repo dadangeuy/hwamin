@@ -40,8 +40,8 @@ INSTALLED_APPS = [
     'rest_framework',
     'api',
     'account',
-    'game',
     'dua_empat',
+    'session',
 ]
 
 MIDDLEWARE = [
