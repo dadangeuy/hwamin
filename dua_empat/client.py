@@ -11,13 +11,14 @@ from session.client import SessionClient
 
 
 class DuaEmpatClient:
-    @classmethod
-    def start(cls, source_id: str) -> List[str]:
+
+    @staticmethod
+    def start(source_id: str) -> List[str]:
         question = UpdateOrCreateQuestionService.run(source_id)
         return ['game dimulai', question.display_numbers]
 
-    @classmethod
-    def end(cls, source_id: str) -> List[str]:
+    @staticmethod
+    def end(source_id: str) -> List[str]:
         score_board = SessionClient.get_score_board(source_id)
         return [score_board, 'game selesai']
 

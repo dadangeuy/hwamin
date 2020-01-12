@@ -5,8 +5,8 @@ from session.client import SessionClient
 
 class CommandClient:
 
-    @classmethod
-    def run_command(cls, token: str, source_id: str, profile_id: str, text: str) -> None:
+    @staticmethod
+    def run_command(token: str, source_id: str, profile_id: str, text: str) -> None:
         command = text.lower()
         reply_texts = None
 
