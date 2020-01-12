@@ -2,7 +2,7 @@ from account.models import Profile
 from account.services import GetOrCreateProfileService
 
 
-class AccountApplication:
+class AccountClient:
 
     @classmethod
     def get_profile(cls, user_id: str, group_id: str = None, room_id: str = None) -> Profile:

@@ -2,7 +2,7 @@ from session.selectors import PlaySelector, ScoreSelector
 from session.services import DeleteScoreService, UpdateScoreService, CreatePlayService, DeletePlayService
 
 
-class SessionApplication:
+class SessionClient:
 
     @staticmethod
     def start_game(source_id: str, game_id: str) -> None:

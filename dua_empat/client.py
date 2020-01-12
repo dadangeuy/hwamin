@@ -7,10 +7,10 @@ from dua_empat.services import (
     GetAndValidateSolutionService,
     UpdateOrCreateQuestionService
 )
-from session.application import SessionApplication
+from session.client import SessionClient
 
 
-class DuaEmpatApplication:
+class DuaEmpatClient:
     @classmethod
     def start(cls, source_id: str) -> List[str]:
         question = UpdateOrCreateQuestionService.run(source_id)
@@ -18,7 +18,7 @@ class DuaEmpatApplication:
 
     @classmethod
     def end(cls, source_id: str) -> List[str]:
-        score_board = SessionApplication.get_score_board(source_id)
+        score_board = SessionClient.get_score_board(source_id)
         return [score_board, 'game selesai']
 
     @classmethod
@@ -38,7 +38,7 @@ class DuaEmpatApplication:
     @classmethod
     def _give_up(cls, source_id: str) -> List[str]:
         answer = GetSolutionService.run(source_id) or 'tidak ada'
-        score_board = SessionApplication.get_score_board(source_id)
+        score_board = SessionClient.get_score_board(source_id)
         question = UpdateOrCreateQuestionService.run(source_id)
         return [f'jawabannya {answer}', score_board, question.display_numbers]
 
@@ -49,13 +49,13 @@ class DuaEmpatApplication:
             is_correct = answer is None
 
             if is_correct:
-                SessionApplication.update_score(source_id, profile_id, 1)
-                score_board = SessionApplication.get_score_board(source_id)
+                SessionClient.update_score(source_id, profile_id, 1)
+                score_board = SessionClient.get_score_board(source_id)
                 question = UpdateOrCreateQuestionService.run(source_id)
                 return [score_board, question.display_numbers]
 
             else:
-                SessionApplication.update_score(source_id, profile_id, -1)
+                SessionClient.update_score(source_id, profile_id, -1)
                 return ['ada jawabannya loh']
 
         else:
@@ -64,13 +64,13 @@ class DuaEmpatApplication:
                 is_correct = result == 24
 
                 if is_correct:
-                    SessionApplication.update_score(source_id, profile_id, 1)
-                    score_board = SessionApplication.get_score_board(source_id)
+                    SessionClient.update_score(source_id, profile_id, 1)
+                    score_board = SessionClient.get_score_board(source_id)
                     question = UpdateOrCreateQuestionService.run(source_id)
                     return [score_board, question.display_numbers]
 
                 else:
-                    SessionApplication.update_score(source_id, profile_id, -1)
+                    SessionClient.update_score(source_id, profile_id, -1)
                     return [f'{text} = {result:g}']
 
             except UnknownCommandException:
