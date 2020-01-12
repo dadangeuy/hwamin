@@ -2,7 +2,7 @@ from typing import List
 
 from common.exceptions import UnknownCommandException
 from dua_empat.services import QuestionService, AnswerService
-from session.application import SessionApplication
+from session import SessionApplication
 
 
 class DuaEmpatApplication:
