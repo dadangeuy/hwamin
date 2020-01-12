@@ -49,13 +49,13 @@ class DuaEmpatApplication:
             is_correct = answer is None
 
             if is_correct:
-                SessionApplication.add_point(source_id, profile_id, 1)
+                SessionApplication.update_score_point(source_id, profile_id, 1)
                 score_info = SessionApplication.get_score_info(source_id)
                 question = UpdateOrCreateQuestionService.run(source_id)
                 return [score_info, question.display_numbers]
 
             else:
-                SessionApplication.add_point(source_id, profile_id, -1)
+                SessionApplication.update_score_point(source_id, profile_id, -1)
                 return ['ada jawabannya loh']
 
         else:
@@ -64,13 +64,13 @@ class DuaEmpatApplication:
                 is_correct = result == 24
 
                 if is_correct:
-                    SessionApplication.add_point(source_id, profile_id, 1)
+                    SessionApplication.update_score_point(source_id, profile_id, 1)
                     score_info = SessionApplication.get_score_info(source_id)
                     question = UpdateOrCreateQuestionService.run(source_id)
                     return [score_info, question.display_numbers]
 
                 else:
-                    SessionApplication.add_point(source_id, profile_id, -1)
+                    SessionApplication.update_score_point(source_id, profile_id, -1)
                     return [f'{text} = {result:g}']
 
             except UnknownCommandException:

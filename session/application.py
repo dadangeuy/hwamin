@@ -21,5 +21,5 @@ class SessionApplication:
         return ScoreService.get_info(source_id)
 
     @staticmethod
-    def add_point(source_id: str, profile_id: str, point: int) -> None:
+    def update_score_point(source_id: str, profile_id: str, point: int) -> None:
         ScoreService.add_point(source_id, profile_id, point)
