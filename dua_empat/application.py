@@ -2,7 +2,7 @@ from typing import List
 
 from common.exceptions import UnknownCommandException
 from dua_empat.services import QuestionService, AnswerService
-from session.services.score import ScoreService
+from session.application import SessionApplication
 
 
 class DuaEmpatApplication:
@@ -13,7 +13,7 @@ class DuaEmpatApplication:
 
     @classmethod
     def end(cls, source_id: str) -> List[str]:
-        score_info = ScoreService.get_info(source_id)
+        score_info = SessionApplication.get_score_info(source_id)
         return [score_info, 'game selesai']
 
     @classmethod
@@ -33,7 +33,7 @@ class DuaEmpatApplication:
     @classmethod
     def _give_up(cls, source_id: str) -> List[str]:
         answer = AnswerService.get_answer(source_id) or 'tidak ada'
-        score_info = ScoreService.get_info(source_id)
+        score_info = SessionApplication.get_score_info(source_id)
         question = QuestionService.get_new_question(source_id)
         return [f'jawabannya {answer}', score_info, question.display_numbers]
 
@@ -44,13 +44,13 @@ class DuaEmpatApplication:
             is_correct = answer is None
 
             if is_correct:
-                ScoreService.add_point(source_id, profile_id, 1)
-                score_info = ScoreService.get_info(source_id)
+                SessionApplication.add_point(source_id, profile_id, 1)
+                score_info = SessionApplication.get_score_info(source_id)
                 question = QuestionService.get_new_question(source_id)
                 return [score_info, question.display_numbers]
 
             else:
-                ScoreService.add_point(source_id, profile_id, -1)
+                SessionApplication.add_point(source_id, profile_id, -1)
                 return ['ada jawabannya loh']
 
         else:
@@ -60,13 +60,13 @@ class DuaEmpatApplication:
                 is_correct = result == 24
 
                 if is_correct:
-                    ScoreService.add_point(source_id, profile_id, 1)
-                    score_info = ScoreService.get_info(source_id)
+                    SessionApplication.add_point(source_id, profile_id, 1)
+                    score_info = SessionApplication.get_score_info(source_id)
                     question = QuestionService.get_new_question(source_id)
                     return [score_info, question.display_numbers]
 
                 else:
-                    ScoreService.add_point(source_id, profile_id, -1)
+                    SessionApplication.add_point(source_id, profile_id, -1)
                     return [f'{text} = {result:g}']
 
             except UnknownCommandException:
