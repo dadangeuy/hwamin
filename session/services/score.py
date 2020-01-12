@@ -16,7 +16,7 @@ class ScoreService:
 
     @classmethod
     def get_info(cls, source_id: str) -> str:
-        score_qs = Score.objects.filter(source_id=source_id).select_related('profile')
+        score_qs = Score.objects.filter(source_id=source_id).select_related('profile').order_by('-point')
         score_lines = (f'{score.profile.name}: {score.point}' for score in score_qs.iterator())
 
         lines = ('[SCOREBOARD]', *score_lines,)
