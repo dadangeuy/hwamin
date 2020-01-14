@@ -18,8 +18,8 @@ class CommandClient:
         elif command == 'udahan':
             game = SessionClient.get_game(source_id)
             if game == 'dua_empat':
-                SessionClient.end_game(source_id)
                 reply_texts = DuaEmpatClient.end(source_id)
+                SessionClient.end_game(source_id)
 
         else:
             game = SessionClient.get_game(source_id)
