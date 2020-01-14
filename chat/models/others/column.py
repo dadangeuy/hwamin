@@ -6,7 +6,6 @@ from dataclasses_json import dataclass_json, LetterCase
 from ..actions import Postback
 
 
-
 @dataclass_json(letter_case=LetterCase.CAMEL)
 @dataclass
 class Column:

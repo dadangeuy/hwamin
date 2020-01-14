@@ -7,7 +7,7 @@ from dataclasses_json import dataclass_json, LetterCase
 @dataclass
 class Postback:
     data: str
-    label: str = None
+    label: str
     display_text: str = None
     text: str = None
     type: str = 'postback'

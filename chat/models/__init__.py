@@ -1,6 +1,4 @@
 from .actions import Postback
-from .messages import Message
-from .messages import Template
-from .messages import Text
+from .messages import Message, Template, Text
 from .others import Column
 from .templates import Carousel

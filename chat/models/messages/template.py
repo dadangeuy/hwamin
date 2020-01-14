@@ -13,5 +13,3 @@ class Template(Message):
     alt_text: str
     template: Union[Carousel]
     type: str = 'template'
-
-
